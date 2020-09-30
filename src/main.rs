@@ -9,23 +9,8 @@ use cortex_m::interrupt::Mutex;
 use cortex_m_rt::entry;
 use stm32h7xx_hal::{interrupt, pac, prelude::*};
 
-use lazy_static::lazy_static;
-use log::*;
-
-use panic_semihosting as _;
-
-pub use cortex_m_log::log::Logger;
-use cortex_m_log::printer::semihosting;
-use cortex_m_log::printer::semihosting::Semihosting;
-use cortex_m_log::modes::InterruptOk;
-use cortex_m_semihosting::hio::HStdout;
-
-lazy_static! {
-    static ref LOGGER: Logger<Semihosting<InterruptOk, HStdout>> = Logger {
-        level: LevelFilter::Info,
-        inner: semihosting::InterruptOk::<_>::stdout().expect("Get Semihosting stdout"),
-    };
-}
+use panic_rtt_target as _;
+use rtt_target::rprintln;
 
 static SDMMC: Mutex<RefCell<Option<Sdmmc>>> = Mutex::new(RefCell::new(None));
 
@@ -33,20 +18,19 @@ static SDMMC: Mutex<RefCell<Option<Sdmmc>>> = Mutex::new(RefCell::new(None));
 fn main() -> ! {
     let _cp = cortex_m::Peripherals::take().unwrap();
     let mut dp = pac::Peripherals::take().unwrap();
+    rtt_target::rtt_init_print!(BlockIfFull);
 
-    cortex_m_log::log::init(&LOGGER).unwrap();
-
-    info!("");
-    info!("Startup");
-    info!("");
+    rprintln!("");
+    rprintln!("Startup");
+    rprintln!("");
 
     // Constrain and Freeze power
-    info!("Setup PWR...                  ");
+    rprintln!("Setup PWR...                  ");
     let pwr = dp.PWR.constrain();
     let pwrcfg = pwr.freeze();
 
     // Constrain and Freeze clock
-    info!("Setup RCC...                  ");
+    rprintln!("Setup RCC...                  ");
     let rcc = dp.RCC.constrain();
 
     let ccdr = rcc
@@ -77,7 +61,7 @@ fn main() -> ! {
     );
     if sdmmc.is_detected() {
         if let Err(e) = sdmmc.init_card() {
-            error!("Unable to connect to MicroSD card: {:?}", e);
+            rprintln!("Unable to connect to MicroSD card: {:?}", e);
         }
     }
 
@@ -100,12 +84,12 @@ fn EXTI9_5() {
         let mut sdmmc = SDMMC.borrow(cs).borrow_mut();
         let sdmmc = sdmmc.as_mut().unwrap();
         if sdmmc.handle_detect() {
-            info!("MicroSD card inserted");
+            rprintln!("MicroSD card inserted");
             if let Err(e) = sdmmc.init_card() {
-                error!("Error connecting to MicroSD card: {:?}", e);
+                rprintln!("Error connecting to MicroSD card: {:?}", e);
             }
         } else {
-            info!("MicroSD card removed");
+            rprintln!("MicroSD card removed");
         }
     });
 }
@@ -164,7 +148,7 @@ impl Sdmmc {
         self.sdmmc.init_card(50.mhz())?;
         let card_info = self.sdmmc.card()?;
         self.led.set_low().unwrap();
-        info!("MicroSD Card connected: {:?}", card_info);
+        rprintln!("MicroSD Card connected: {:?}", card_info);
 
         Ok(())
     }
