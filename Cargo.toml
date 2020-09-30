@@ -1,0 +1,21 @@
+[package]
+authors = ["Matt Ickstadt <mattico8@gmail.com>"]
+edition = "2018"
+readme = "README.md"
+name = "miscomp-repro"
+version = "0.1.0"
+
+[dependencies]
+cortex-m = "0.6.0"
+cortex-m-rt = "0.6.10"
+embedded-sdmmc = "0.3"
+log = "0.4.11"
+rtt-target = { version = "0.2.0", features = ["cortex-m"] }
+panic-rtt-target = { version = "0.1.0", features = ["cortex-m"] }
+
+[dependencies.stm32h7xx-hal]
+features = ["stm32h743v", "rt", "sdmmc", "rtc"]
+path = "stm32h7xx-hal"
+
+[profile.release]
+debug = true # symbols are nice and they don't increase the size on Flash

@@ -1,0 +1,76 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Program",
+            "cwd": "${workspaceRoot}",
+            "executable": "./target/thumbv7em-none-eabihf/debug/miscomp-repro",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "STM32H743BI",
+            "svdFile": ".vscode/STM32H743x.svd",
+            "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+            "serverArgs": ["-speed", "15000"],
+            "interface": "swd",
+            "runToMain": true,
+            "preLaunchTask": "cargo build",
+        },
+        {
+            "name": "Run Program",
+            "cwd": "${workspaceRoot}",
+            "executable": "./target/thumbv7em-none-eabihf/release/miscomp-repro",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "STM32H743BI",
+            "svdFile": ".vscode/STM32H743x.svd",
+            "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+            "serverArgs": ["-speed", "15000"],
+            "interface": "swd",
+            "runToMain": true,
+            "preLaunchTask": "cargo build --release"
+        },
+        {
+            "name": "Debug Program (ST-LINK)",
+            "cwd": "${workspaceRoot}",
+            "executable": "./target/thumbv7em-none-eabihf/debug/miscomp-repro",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "svdFile": ".vscode/STM32H743x.svd",
+            "debuggerArgs": [
+                // "-x", ".vscode/openocd.gdb"
+            ],
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32h7x_dual_bank.cfg"
+            ],
+            "interface": "swd",
+            "runToMain": true,
+            //"preLaunchTask": "cargo build",
+        },
+        {
+            "name": "Run Program (ST-LINK)",
+            "cwd": "${workspaceRoot}",
+            "executable": "./target/thumbv7em-none-eabihf/release/miscomp-repro",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "svdFile": ".vscode/STM32H743x.svd",
+            "debuggerArgs": [
+                // "-x", ".vscode/openocd.gdb"
+            ],
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32h7x_dual_bank.cfg"
+            ],
+            "interface": "swd",
+            "runToMain": true,
+            //"preLaunchTask": "cargo build --release"
+        }
+    ]
+}
