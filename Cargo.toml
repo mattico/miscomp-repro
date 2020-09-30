@@ -14,7 +14,7 @@ rtt-target = { version = "0.2.0", features = ["cortex-m"] }
 panic-rtt-target = { version = "0.1.0", features = ["cortex-m"] }
 
 [dependencies.stm32h7xx-hal]
-features = ["stm32h743v", "rt", "sdmmc", "rtc"]
+features = ["stm32h743v", "rt", "sdmmc"]
 path = "stm32h7xx-hal"
 
 [profile.release]

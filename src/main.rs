@@ -12,14 +12,14 @@ use cortex_m::interrupt::Mutex;
 use cortex_m_rt::entry;
 use stm32h7xx_hal::{interrupt, pac, prelude::*};
 
-use log::{error, info, warn};
+use log::{error, info};
 
 static SDMMC: Mutex<RefCell<Option<sdmmc::Sdmmc>>> = Mutex::new(RefCell::new(None));
 
 #[entry]
 fn main() -> ! {
     logger::init();
-    let cp = cortex_m::Peripherals::take().unwrap();
+    let _cp = cortex_m::Peripherals::take().unwrap();
     let mut dp = pac::Peripherals::take().unwrap();
 
     // Constrain and Freeze power
@@ -41,7 +41,6 @@ fn main() -> ! {
     gpiob.pb3.into_alternate_af0(); // TRACESWO
     let gpioc = dp.GPIOC.split(ccdr.peripheral.GPIOC);
     let gpiod = dp.GPIOD.split(ccdr.peripheral.GPIOD);
-    let gpioi = dp.GPIOI.split(ccdr.peripheral.GPIOI);
 
     let mut sdmmc = sdmmc::Sdmmc::new(
         gpioc.pc12,

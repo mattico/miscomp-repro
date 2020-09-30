@@ -1,12 +1,12 @@
-use log::{info, error, warn};
+use log::{info};
 use core::cell::RefCell;
 use embedded_sdmmc::{Block, BlockCount, BlockIdx, TimeSource, Timestamp};
 use stm32h7xx_hal::hal::digital::v2::{InputPin, OutputPin, ToggleableOutputPin};
-use stm32h7xx_hal::{gpio::*, pac, prelude::*, rcc, rcc::rec, rtc, sdmmc};
+use stm32h7xx_hal::{gpio::*, pac, prelude::*, rcc, rcc::rec, sdmmc};
 
-pub type SdFilesystem<'a> = embedded_sdmmc::Controller<SdioBlockDevice<'a>, DummyTimeSource>;
+// pub type SdFilesystem<'a> = embedded_sdmmc::Controller<SdioBlockDevice<'a>, DummyTimeSource>;
 
-pub type SdFilesystemError = embedded_sdmmc::Error<sdmmc::Error>;
+// pub type SdFilesystemError = embedded_sdmmc::Error<sdmmc::Error>;
 
 pub struct SdioBlockDevice<'a>(pub &'a RefCell<Sdmmc>);
 
@@ -58,9 +58,7 @@ impl Sdmmc {
         if self.detect.is_low().unwrap() {
             return Err(sdmmc::Error::NoCard);
         }
-        if let Err(e) = self.sdmmc.init_card(50.mhz()) {
-            error!("init_card error {:?}", e);
-        }
+        self.sdmmc.init_card(50.mhz())?;
         let card_info = self.sdmmc.card()?;
         self.led.set_low().unwrap();
         info!("MicroSD Card connected: {:?}", card_info);
