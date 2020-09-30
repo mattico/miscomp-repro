@@ -1,14 +1,7 @@
 use log::{info};
 use core::cell::RefCell;
-use embedded_sdmmc::{Block, BlockCount, BlockIdx, TimeSource, Timestamp};
 use stm32h7xx_hal::hal::digital::v2::{InputPin, OutputPin, ToggleableOutputPin};
 use stm32h7xx_hal::{gpio::*, pac, prelude::*, rcc, rcc::rec, sdmmc};
-
-// pub type SdFilesystem<'a> = embedded_sdmmc::Controller<SdioBlockDevice<'a>, DummyTimeSource>;
-
-// pub type SdFilesystemError = embedded_sdmmc::Error<sdmmc::Error>;
-
-pub struct SdioBlockDevice<'a>(pub &'a RefCell<Sdmmc>);
 
 pub struct Sdmmc {
     sdmmc: sdmmc::Sdmmc<pac::SDMMC1>,
@@ -74,63 +67,5 @@ impl Sdmmc {
     pub fn handle_detect(&mut self) -> bool {
         self.detect.clear_interrupt_pending_bit();
         self.detect.is_high().unwrap()
-    }
-}
-
-impl<'a> embedded_sdmmc::BlockDevice for SdioBlockDevice<'a> {
-    type Error = sdmmc::Error;
-
-    fn read(
-        &self,
-        blocks: &mut [Block],
-        start_block_idx: BlockIdx,
-        _reason: &str,
-    ) -> Result<(), Self::Error> {
-        let mut s = self.0.borrow_mut();
-        let blocks: &mut [u8] = unsafe {
-            core::slice::from_raw_parts_mut(
-                blocks.as_mut_ptr() as *mut u8,
-                blocks.len() * Block::LEN,
-            )
-        };
-        s.led.set_high().unwrap();
-        s.sdmmc.read_blocks(start_block_idx.0, blocks)?;
-        s.led.set_low().unwrap();
-        Ok(())
-    }
-
-    fn write(&self, blocks: &[Block], start_block_idx: BlockIdx) -> Result<(), Self::Error> {
-        let mut s = self.0.borrow_mut();
-        let mut start_idx = start_block_idx.0;
-
-        for block in blocks {
-            s.led.toggle().unwrap();
-            s.sdmmc.write_block(start_idx, block)?;
-            start_idx += Block::LEN as u32;
-        }
-
-        s.led.set_low().unwrap();
-
-        Ok(())
-    }
-
-    fn num_blocks(&self) -> Result<BlockCount, Self::Error> {
-        let s = self.0.borrow();
-        Ok(BlockCount(s.sdmmc.card()?.size() as u32))
-    }
-}
-
-pub struct DummyTimeSource;
-
-impl TimeSource for DummyTimeSource {
-    fn get_timestamp(&self) -> Timestamp {
-        Timestamp {
-            year_since_1970: 0,
-            zero_indexed_month: 0,
-            zero_indexed_day: 0,
-            hours: 0,
-            minutes: 0,
-            seconds: 0,
-        }
     }
 }
